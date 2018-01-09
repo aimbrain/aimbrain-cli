@@ -1,0 +1,7 @@
+
+aimbrain.egg-info
+aimbrain.egg-info/*
+*.swp
+*.pyc
+build
+dist

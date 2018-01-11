@@ -6,15 +6,14 @@ from os.path import abspath, dirname, join
 from subprocess import call
 
 from setuptools import Command
-from setuptools import find_packages
 from setuptools import setup
 
 from aimbrain import __version__
 
 
 this_dir = abspath(dirname(__file__))
-with open(join(this_dir, 'README.md'), encoding='utf-8') as file:
-    long_description = file.read()
+with open(join(this_dir, 'README.md'), encoding='utf-8') as f:
+    long_description = f.read()
 
 
 class RunTests(Command):
@@ -35,24 +34,21 @@ class RunTests(Command):
 
 
 setup(
-    name = 'aimbrain',
-    version = __version__,
-    description = 'A CLI to run common aimbrain tasks.',
-    long_description = long_description,
-    url = 'https://bitbucket.org/aimbrain/aimbrain-cli',
-    author = 'Sam Lacey',
-    author_email = 'sam@aimbrain.com',
-    license = 'MIT',
-    keywords = 'cli',
-    packages = ['aimbrain'],
-    install_requires = ['docopt'],
-    extras_require = {
-        'test': ['coverage', 'pytest', 'pytest-cov'],
-    },
-    entry_points = {
-        'console_scripts': [
-            'aimbrain = aimbrain.__main__:main',
-        ],
-    },
-    cmdclass = {'test': RunTests},
+    name='aimbrain',
+    version=__version__,
+    description='A CLI to run common aimbrain tasks.',
+    long_description=long_description,
+    url='https://bitbucket.org/aimbrain/aimbrain-cli',
+    author='Sam Lacey',
+    author_email='sam@aimbrain.com',
+    license='MIT',
+    keywords='cli',
+    packages=['aimbrain'],
+    install_requires=['docopt'],
+    extras_require={'test': ['coverage', 'pytest', 'pytest-cov']},
+    entry_points='''
+        [console_scripts]
+        aimbrain-cli=aimbrain.aimbrain:main
+    ''',
+    cmdclass={'test': RunTests},
 )

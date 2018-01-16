@@ -32,6 +32,8 @@ class AbstractRequestGenerator(BaseCommand):
         else:
             self.base_url = 'aimbrain.com'
 
+        self.session = self.get_session()
+
     def get_hmac_sig(self, method, endpoint, body):
         message = '%s\n%s\n%s' % (method.upper(), endpoint.lower(), body)
 
@@ -79,6 +81,7 @@ class AbstractRequestGenerator(BaseCommand):
         return encoded
 
     def do_request(self, endpoint, body):
+        body['session'] = self.session
         payload = json.dumps(body)
         headers = self.get_aimbrain_headers('POST', endpoint, payload)
         request_url = self.get_url(endpoint)
@@ -93,17 +96,25 @@ class Auth(AbstractRequestGenerator):
     def __init__(self, options, *args, **kwargs):
         super(Auth, self).__init__(options, args, kwargs)
 
+        self.token = options.get('--token')
         self.auth_type = 'face' if options.get('face') else 'voice'
         self.biometrics = options.get('<biometrics>')
 
     def run(self):
-        body = {'session': self.get_session()}
+        body = {}
         endpoint = ''
         if self.auth_type == 'face':
             endpoint = V1_FACE_AUTH_ENDPOINT
             body['faces'] = []
             for face in self.biometrics:
                 body['faces'].append(self.encode_biometric(face))
+
+        elif self.auth_type == 'voice':
+            self.do_request(V1_VOICE_TOKEN_ENDPOINT, {'tokentype': self.token})
+            endpoint = V1_VOICE_AUTH_ENDPOINT
+            body['voices'] = []
+            for voice in self.biometrics:
+                body['voices'].append(self.encode_biometric(voice))
 
         payload = self.do_request(endpoint, body)
         print payload

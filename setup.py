@@ -34,7 +34,7 @@ class RunTests(Command):
 
 
 setup(
-    name='aimbrain',
+    name='aimbrain-cli',
     version=__version__,
     description='A CLI to run common aimbrain tasks.',
     long_description=long_description,

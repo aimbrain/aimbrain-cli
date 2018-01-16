@@ -90,7 +90,13 @@ class AbstractRequestGenerator(BaseCommand):
 
         resp = requests.post(request_url, payload, headers=headers)
 
-        return resp.json()
+        response_payload = ''
+        try:
+            response_payload = resp.json()
+        except ValueError:
+            response_payload = resp.reason
+
+        return '\n[%d] %s\n' % (resp.status_code, response_payload)
 
 
 class Auth(AbstractRequestGenerator):

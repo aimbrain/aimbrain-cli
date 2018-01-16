@@ -137,3 +137,29 @@ class Compare(AbstractRequestGenerator):
 
             payload = self.do_request(V1_FACE_COMPARE_ENDPOINT, body)
             print payload
+
+
+class Enroll(AbstractRequestGenerator):
+    
+    def __init__(self, options, *args, **kwargs):
+        super(Enroll, self).__init__(options, args, kwargs)
+
+        self.biometrics = options.get('<biometrics>')
+
+    def run(self):
+        endpoint = ''
+        body = {}
+        if self.auth_type == 'face':
+            endpoint = V1_FACE_ENROLL_ENDPOINT
+            body['faces'] = []
+            for face in self.biometrics:
+                body['faces'].append(self.encode_biometric(face))
+
+        elif self.auth_type == 'voice':
+            endpoint = V1_VOICE_ENROLL_ENDPOINT
+            body['voices'] = []
+            for voice in self.biometrics:
+                body['voices'].append(self.encode_biometric(voice))
+
+        payload = self.do_request(endpoint, body)
+        print payload

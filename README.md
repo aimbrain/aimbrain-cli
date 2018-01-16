@@ -16,7 +16,7 @@ However, if you wish to do some dev work on it, run the following for a better
 dev experience:
 
 ```
-virtual env /path/to/envs/aimbrain-cli
+virtualenv /path/to/envs/aimbrain-cli
 source /path/to/envs/aimbrain-cli/bin/activate
 pip install --editable .
 ```

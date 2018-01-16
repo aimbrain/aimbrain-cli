@@ -33,6 +33,7 @@ class AbstractRequestGenerator(BaseCommand):
             self.base_url = 'aimbrain.com'
 
         self.session = self.get_session()
+        self.auth_type = 'face' if options.get('face') else 'voice'
 
     def get_hmac_sig(self, method, endpoint, body):
         message = '%s\n%s\n%s' % (method.upper(), endpoint.lower(), body)
@@ -97,7 +98,6 @@ class Auth(AbstractRequestGenerator):
         super(Auth, self).__init__(options, args, kwargs)
 
         self.token = options.get('--token')
-        self.auth_type = 'face' if options.get('face') else 'voice'
         self.biometrics = options.get('<biometrics>')
 
     def run(self):
@@ -118,3 +118,22 @@ class Auth(AbstractRequestGenerator):
 
         payload = self.do_request(endpoint, body)
         print payload
+
+
+class Compare(AbstractRequestGenerator):
+    
+    def __init__(self, options, *args, **kwargs):
+        super(Compare, self).__init__(options, args, kwargs)
+        
+        self.biometric1 = options.get('<biometric1>')
+        self.biometric2 = options.get('<biometric2>')
+
+    def run(self):
+        if self.auth_type == 'face':
+            body = {
+                'faces1': [self.encode_biometric(self.biometric1)],
+                'faces2': [self.encode_biometric(self.biometric2)]
+            }
+
+            payload = self.do_request(V1_FACE_COMPARE_ENDPOINT, body)
+            print payload

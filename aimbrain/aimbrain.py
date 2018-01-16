@@ -29,6 +29,7 @@ from docopt import docopt
 
 from . import __version__ as VERSION
 from commands.api import Auth
+from commands.api import Compare
 from commands.videoconv import VideoConv
 
 
@@ -41,5 +42,7 @@ def main():
         cmd = VideoConv(options)
     elif options.get('auth'):
         cmd = Auth(options)
+    elif options.get('compare'):
+        cmd = Compare(options)
 
     cmd.run()

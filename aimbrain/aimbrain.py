@@ -5,6 +5,7 @@ Usage:
   aimbrain-cli auth (face|voice) <biometrics>... --user-id=<uid> --api-key=<api_key> --secret=<secret> [--token=<token>] [--dev]
   aimbrain-cli compare (face) <biometric1> <biometric2> --user-id=<uid> --api-key=<api_key> --secret=<secret> [--dev]
   aimbrain-cli enroll (face|voice) <biometrics>... --user-id=<uid> --api-key=<api_key> --secret=<secret> [--dev]
+  aimbrain-cli token (voice) --user-id=<uid> --api-key=<api_key> --secret=<secret> [--token=<token>] [--dev]
   aimbrain-cli videoconv (blur|brighten|sharpen|contrast) <factor> --in=<input_file> --out=<output_file> --avconv=<avconv> --ffprobe=<ffprobe>
   aimbrain-cli -h | --help
   aimbrain-cli --version
@@ -44,6 +45,7 @@ from . import __version__ as VERSION
 from commands.api import Auth
 from commands.api import Compare
 from commands.api import Enroll
+from commands.api import Token
 from commands.videoconv import VideoConv
 
 
@@ -60,5 +62,7 @@ def main():
         cmd = Compare(options)
     elif options.get('enroll'):
         cmd = Enroll(options)
+    elif options.get('token'):
+        cmd = Token(options)
 
     cmd.run()

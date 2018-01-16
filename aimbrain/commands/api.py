@@ -170,3 +170,20 @@ class Enroll(AbstractRequestGenerator):
 
         payload = self.do_request(endpoint, body)
         print payload
+
+
+class Token(AbstractRequestGenerator):
+    
+    def __init__(self, options, *args, **kwargs):
+        super(Token, self).__init__(options, args, kwargs)
+
+        self.token = options.get('--token')
+
+    def run(self):
+        if self.auth_type == 'voice':
+            payload = self.do_request(
+                V1_VOICE_TOKEN_ENDPOINT,
+                {'tokentype': self.token}
+            )
+
+            print payload

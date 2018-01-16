@@ -3,6 +3,9 @@ aimbrain
 
 Usage:
   aimbrain videoconv (blur|brighten|sharpen|contrast) <factor> --in=<input_file> --out=<output_file> --avconv=<avconv> --ffprobe=<ffprobe>
+  aimbrain auth (face|voice) <biometrics>... --user-id=<uid> --api-key=<api_key> --secret=<secret> --dev
+  aimbrain compare (face) <biometric1> <biometric2> --user-id=<uid> --api-key=<api_key> --secret=<secret> --dev
+  aimbrain enroll (face|voice) <biometrics>... --user-id=<uid> --api-key=<api_key> --secret=<secret> --dev
   aimbrain -h | --help
   aimbrain --version
 
@@ -25,6 +28,7 @@ from inspect import isclass
 from docopt import docopt
 
 from . import __version__ as VERSION
+from commands.api import Auth
 from commands.videoconv import VideoConv
 
 
@@ -36,5 +40,7 @@ def main():
     cmd = None
     if options.get('videoconv'):
         cmd = VideoConv(options)
+    elif options.get('auth'):
+        cmd = Auth(options)
 
     cmd.run()

@@ -9,12 +9,9 @@ from aimbrain.commands.utils.video_reader import VideoCaptureService
 
 
 class VideoConv(BaseCommand):
-    command_id = 'videoconv'
 
     def __init__(self, options, *args, **kwargs):
-        self.options = options
-        self.args = args
-        self.kwargs = kwargs
+        super(VideoConv, self).__init__(self, options, *args, **kwargs)
 
         self.input = options.get('--in')
         self.output = options.get('--out')
@@ -73,7 +70,7 @@ class VideoConv(BaseCommand):
         blurred_frames = []
         for frame in frames:
             blurred_frames.append(
-                frame.filter(ImageFilter.BoxBlur(self.factor))
+                frame.filter(ImageFilter.GaussianBlur(self.factor))
             )
 
         return blurred_frames

@@ -9,10 +9,11 @@ import requests
 from aimbrain.commands.base import BaseCommand
 
 
+V1_SESSIONS_ENDPOINT = '/v1/sessions'
+
 V1_FACE_AUTH_ENDPOINT = '/v1/face/auth'
 V1_FACE_COMPARE_ENDPOINT = '/v1/face/compare'
 V1_FACE_ENROLL_ENDPOINT = '/v1/face/enroll'
-V1_SESSIONS_ENDPOINT = '/v1/sessions'
 
 V1_VOICE_AUTH_ENDPOINT = '/v1/voice/auth'
 V1_VOICE_ENROLL_ENDPOINT = '/v1/voice/enroll'

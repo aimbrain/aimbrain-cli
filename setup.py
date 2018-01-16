@@ -43,8 +43,8 @@ setup(
     author_email='sam@aimbrain.com',
     license='MIT',
     keywords='cli',
-    packages=['aimbrain'],
-    install_requires=['docopt'],
+    packages=['aimbrain', 'aimbrain.commands', 'aimbrain.commands.utils'],
+    install_requires=['docopt', 'opencv-python', 'requests', 'numpy', 'pillow'],
     extras_require={'test': ['coverage', 'pytest', 'pytest-cov']},
     entry_points='''
         [console_scripts]

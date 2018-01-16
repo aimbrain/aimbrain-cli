@@ -1,20 +1,33 @@
 """
-aimbrain
+aimbrain-cli
 
 Usage:
-  aimbrain videoconv (blur|brighten|sharpen|contrast) <factor> --in=<input_file> --out=<output_file> --avconv=<avconv> --ffprobe=<ffprobe>
-  aimbrain auth (face|voice) <biometrics>... --user-id=<uid> --api-key=<api_key> --secret=<secret> [--token=<token>] [--dev]
-  aimbrain compare (face) <biometric1> <biometric2> --user-id=<uid> --api-key=<api_key> --secret=<secret> [--dev]
-  aimbrain enroll (face|voice) <biometrics>... --user-id=<uid> --api-key=<api_key> --secret=<secret> [--dev]
-  aimbrain -h | --help
-  aimbrain --version
+  aimbrain-cli auth (face|voice) <biometrics>... --user-id=<uid> --api-key=<api_key> --secret=<secret> [--token=<token>] [--dev]
+  aimbrain-cli compare (face) <biometric1> <biometric2> --user-id=<uid> --api-key=<api_key> --secret=<secret> [--dev]
+  aimbrain-cli enroll (face|voice) <biometrics>... --user-id=<uid> --api-key=<api_key> --secret=<secret> [--dev]
+  aimbrain-cli videoconv (blur|brighten|sharpen|contrast) <factor> --in=<input_file> --out=<output_file> --avconv=<avconv> --ffprobe=<ffprobe>
+  aimbrain-cli -h | --help
+  aimbrain-cli --version
 
 Options:
-  -h --help                         Show this screen.
-  --version                         Show version.
+  Requests:
+    --user-id=<uid>                         User ID in Aimbrain
+    --api-key=<key>                         Your Aimbrain API key
+    --secret=<secret>                       Your Aimbrain Secret
+    --token=<token>                         Generate specific token for voice auth e.g. enroll-6 for 1-2-3
+    --dev                                   Toggle to send requests to dev environment
+
+  VideoConv:
+    --in=<input_file>/--out=<output_file>   Input/Output file for videoconv
+    --avconv=<avconv>/--ffprobe=<ffprobe>   Path to avconv/ffprobe
+
+  Generic:
+    -h --help                               Show this screen.
+    --version                               Show version.
 
 Examples:
-  aimbrain videoconv blur 1.5 --in=/home/aimbrain/auth.mov --out=/home/aimbrain/auth_blur.mov --avconv=/path/to/avconv --ffprobe=/path/to/ffprobe
+  aimbrain-cli auth face /path/to/face_image.png --user-id=user --api-key=key --secret=secret --dev
+  aimbrain-cli videoconv blur 1.5 --in=/home/aimbrain/auth.mov --out=/home/aimbrain/auth_blur.mov --avconv=/path/to/avconv --ffprobe=/path/to/ffprobe
 
 Help:
   For help using this tool, please open an issue on the repository:

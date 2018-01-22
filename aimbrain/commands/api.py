@@ -76,7 +76,20 @@ class AbstractRequestGenerator(BaseCommand):
         resp = requests.post(session_url, payload, headers=headers)
         self.raw_session = resp.text
 
-        return resp.json().get('session')
+        response_payload = ''
+        session = ''
+        try:
+            response_payload = resp.json()
+            session = response_payload.get('session')
+        except ValueError:
+            response_payload = resp.reason
+
+        print '\n[Session][%d] %s\n' % (resp.status_code, response_payload)
+        if not session:
+            print 'Failed to get session, got: %s' % resp.text
+            sys.exit(1)
+
+        return session
 
     def get_aimbrain_headers(self, method, endpoint, body):
         return {
@@ -106,7 +119,7 @@ class AbstractRequestGenerator(BaseCommand):
         except ValueError:
             response_payload = resp.reason
 
-        return '\n[%d] %s\n' % (resp.status_code, response_payload)
+        return '\n[%s][%d] %s\n' % (endpoint, resp.status_code, response_payload)
 
 
 class Auth(AbstractRequestGenerator):
@@ -157,7 +170,7 @@ class Compare(AbstractRequestGenerator):
 
 
 class Enroll(AbstractRequestGenerator):
-    
+
     def __init__(self, options, *args, **kwargs):
         super(Enroll, self).__init__(options, args, kwargs)
 
@@ -183,7 +196,7 @@ class Enroll(AbstractRequestGenerator):
 
 
 class Token(AbstractRequestGenerator):
-    
+
     def __init__(self, options, *args, **kwargs):
         super(Token, self).__init__(options, args, kwargs)
 
@@ -197,3 +210,9 @@ class Token(AbstractRequestGenerator):
             )
 
             print payload
+
+
+class Session(AbstractRequestGenerator):
+
+    def run(self):
+        pass

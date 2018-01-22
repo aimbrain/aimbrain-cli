@@ -2,6 +2,7 @@ import base64
 import hashlib
 import hmac
 import json
+import sys
 import urlparse
 
 import requests
@@ -33,7 +34,15 @@ class AbstractRequestGenerator(BaseCommand):
         else:
             self.base_url = 'aimbrain.com'
 
-        self.session = self.get_session()
+        # For debug/errors
+        self.raw_session = None
+
+        try:
+            self.session = self.get_session()
+        except Exception:
+            print('Failed to get session, response: %s' % self.raw_session)
+            sys.exit(1)
+
         self.auth_type = 'face' if options.get('face') else 'voice'
 
     def get_hmac_sig(self, method, endpoint, body):
@@ -65,6 +74,7 @@ class AbstractRequestGenerator(BaseCommand):
         session_url = self.get_url(V1_SESSIONS_ENDPOINT)
         headers = self.get_aimbrain_headers('POST', V1_SESSIONS_ENDPOINT, payload)
         resp = requests.post(session_url, payload, headers=headers)
+        self.raw_session = resp.text
 
         return resp.json().get('session')
 
@@ -128,10 +138,10 @@ class Auth(AbstractRequestGenerator):
 
 
 class Compare(AbstractRequestGenerator):
-    
+
     def __init__(self, options, *args, **kwargs):
         super(Compare, self).__init__(options, args, kwargs)
-        
+
         self.biometric1 = options.get('<biometric1>')
         self.biometric2 = options.get('<biometric2>')
 

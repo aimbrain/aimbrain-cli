@@ -29,8 +29,14 @@ class AbstractRequestGenerator(BaseCommand):
         self.secret = options.get('--secret')
         self.api_key = options.get('--api-key')
 
+        self.protocol = 'https'
+        self.extra_headers = {}
         if options.get('--dev'):
             self.base_url = 'dev.aimbrain.com'
+        elif options.get('--local'):
+            self.protocol = 'http'
+            self.base_url = 'localhost:8080'
+            self.extra_headers['X-Forwarded-For'] = '127.0.0.1'
         else:
             self.base_url = 'aimbrain.com'
 
@@ -56,7 +62,7 @@ class AbstractRequestGenerator(BaseCommand):
 
     def get_url(self, endpoint):
         return urlparse.urlunparse((
-            'https',
+            self.protocol,
             self.base_url,
             endpoint,
             '',
@@ -78,13 +84,18 @@ class AbstractRequestGenerator(BaseCommand):
 
         response_payload = ''
         session = ''
+
         try:
             response_payload = resp.json()
             session = response_payload.get('session')
         except ValueError:
             response_payload = resp.reason
 
-        print '\n[Session][%d] %s\n' % (resp.status_code, response_payload)
+        print '\n[%s][%d] %s\n' % (
+            V1_SESSIONS_ENDPOINT,
+            resp.status_code,
+            response_payload
+        )
         if not session:
             print 'Failed to get session, got: %s' % resp.text
             sys.exit(1)
@@ -92,10 +103,14 @@ class AbstractRequestGenerator(BaseCommand):
         return session
 
     def get_aimbrain_headers(self, method, endpoint, body):
-        return {
+        headers = {
             'X-Aimbrain-Apikey': self.api_key,
             'X-Aimbrain-Signature': self.get_hmac_sig(method, endpoint, body),
         }
+
+        headers.update(self.extra_headers)
+
+        return headers
 
     def encode_biometric(self, biometric_path):
         encoded = None

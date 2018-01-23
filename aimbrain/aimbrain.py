@@ -2,11 +2,11 @@
 aimbrain-cli
 
 Usage:
-  aimbrain-cli auth (face|voice) <biometrics> --user-id=<uid> --api-key=<api_key> --secret=<secret> [--token=<token>] [--dev]
-  aimbrain-cli compare (face) <biometric1> <biometric2> --user-id=<uid> --api-key=<api_key> --secret=<secret> [--dev]
-  aimbrain-cli enroll (face|voice) <biometrics>... --user-id=<uid> --api-key=<api_key> --secret=<secret> [--dev]
-  aimbrain-cli token (voice) --user-id=<uid> --api-key=<api_key> --secret=<secret> [--token=<token>] [--dev]
-  aimbrain-cli session --user-id=<uid> --api-key=<api_key> --secret=<secret> [--dev]
+  aimbrain-cli auth (face|voice) <biometrics> --user-id=<uid> --api-key=<api_key> --secret=<secret> [--token=<token>] [--dev|--local]
+  aimbrain-cli compare (face) <biometric1> <biometric2> --user-id=<uid> --api-key=<api_key> --secret=<secret> [--dev|--local]
+  aimbrain-cli enroll (face|voice) <biometrics>... --user-id=<uid> --api-key=<api_key> --secret=<secret> [--dev|--local]
+  aimbrain-cli token (voice) --user-id=<uid> --api-key=<api_key> --secret=<secret> [--token=<token>] [--dev|--local]
+  aimbrain-cli session --user-id=<uid> --api-key=<api_key> --secret=<secret> [--dev|--local]
   aimbrain-cli videoconv (blur|brighten|sharpen|contrast) <factor> --in=<input_file> --out=<output_file> --avconv=<avconv> --ffprobe=<ffprobe>
   aimbrain-cli -h | --help
   aimbrain-cli --version
@@ -17,7 +17,8 @@ Options:
     --api-key=<key>                         Your Aimbrain API key
     --secret=<secret>                       Your Aimbrain Secret
     --token=<token>                         Generate specific token for voice auth e.g. enroll-6 for 1-2-3
-    --dev                                   Toggle to send requests to dev environment
+    --dev                                   Toggle to send requests to dev environment: https://dev.aimbrain.com
+    --local                                 Toggle to send requests to local environment: http://localhost:8080
 
   VideoConv:
     --in=<input_file>/--out=<output_file>   Input/Output file for videoconv
@@ -51,8 +52,7 @@ from commands.api import Token
 from commands.videoconv import VideoConv
 
 
-def main():
-    """Main CLI entrypoint."""
+def main():    """Main CLI entrypoint."""
     options = docopt(__doc__, version=VERSION)
 
     cmd = None

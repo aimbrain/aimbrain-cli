@@ -2,7 +2,7 @@
 aimbrain-cli
 
 Usage:
-  aimbrain-cli auth (face|voice) <biometrics>... --user-id=<uid> --api-key=<api_key> --secret=<secret> [--token=<token>] [--dev]
+  aimbrain-cli auth (face|voice) <biometrics> --user-id=<uid> --api-key=<api_key> --secret=<secret> [--token=<token>] [--dev]
   aimbrain-cli compare (face) <biometric1> <biometric2> --user-id=<uid> --api-key=<api_key> --secret=<secret> [--dev]
   aimbrain-cli enroll (face|voice) <biometrics>... --user-id=<uid> --api-key=<api_key> --secret=<secret> [--dev]
   aimbrain-cli token (voice) --user-id=<uid> --api-key=<api_key> --secret=<secret> [--token=<token>] [--dev]

@@ -52,7 +52,7 @@ from commands.api import Token
 from commands.videoconv import VideoConv
 
 
-def main():    """Main CLI entrypoint."""
+def main():
     options = docopt(__doc__, version=VERSION)
 
     cmd = None

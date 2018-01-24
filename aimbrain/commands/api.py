@@ -38,7 +38,7 @@ class AbstractRequestGenerator(BaseCommand):
             self.base_url = 'localhost:8080'
             self.extra_headers['X-Forwarded-For'] = '127.0.0.1'
         else:
-            self.base_url = 'aimbrain.com'
+            self.base_url = 'api.aimbrain.com'
 
         # For debug/errors
         self.raw_session = None

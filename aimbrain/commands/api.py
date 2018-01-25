@@ -3,6 +3,7 @@ import hashlib
 import hmac
 import json
 import sys
+import time
 import urlparse
 
 import requests
@@ -79,7 +80,9 @@ class AbstractRequestGenerator(BaseCommand):
 
         session_url = self.get_url(V1_SESSIONS_ENDPOINT)
         headers = self.get_aimbrain_headers('POST', V1_SESSIONS_ENDPOINT, payload)
+        start = time.time()
         resp = requests.post(session_url, payload, headers=headers)
+        end = time.time() - start
         self.raw_session = resp.text
 
         response_payload = ''
@@ -91,9 +94,10 @@ class AbstractRequestGenerator(BaseCommand):
         except ValueError:
             response_payload = resp.reason
 
-        print '\n[%s][%d] %s\n' % (
+        print '\n[%s][%d][%.2fs] %s\n' % (
             V1_SESSIONS_ENDPOINT,
             resp.status_code,
+            end,
             response_payload
         )
         if not session:
@@ -126,7 +130,9 @@ class AbstractRequestGenerator(BaseCommand):
         headers = self.get_aimbrain_headers('POST', endpoint, payload)
         request_url = self.get_url(endpoint)
 
+        now = time.time()
         resp = requests.post(request_url, payload, headers=headers)
+        end = time.time() - now
 
         response_payload = ''
         try:
@@ -134,7 +140,12 @@ class AbstractRequestGenerator(BaseCommand):
         except ValueError:
             response_payload = resp.reason
 
-        return '\n[%s][%d] %s\n' % (endpoint, resp.status_code, response_payload)
+        return '\n[%s][%d][%.2fs] %s\n' % (
+            endpoint,
+            resp.status_code,
+            end,
+            response_payload
+        )
 
 
 class Auth(AbstractRequestGenerator):

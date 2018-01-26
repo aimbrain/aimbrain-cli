@@ -16,6 +16,7 @@ V1_SESSIONS_ENDPOINT = '/v1/sessions'
 V1_FACE_AUTH_ENDPOINT = '/v1/face/auth'
 V1_FACE_COMPARE_ENDPOINT = '/v1/face/compare'
 V1_FACE_ENROLL_ENDPOINT = '/v1/face/enroll'
+V1_FACE_TOKEN_ENDPOINT = '/v1/face/token'
 
 V1_VOICE_AUTH_ENDPOINT = '/v1/voice/auth'
 V1_VOICE_ENROLL_ENDPOINT = '/v1/voice/enroll'
@@ -159,6 +160,8 @@ class Auth(AbstractRequestGenerator):
     def run(self):
         body = {}
         endpoint = ''
+        self.do_request(V1_VOICE_TOKEN_ENDPOINT, {'tokentype': self.token})
+
         if self.auth_type == 'face':
             endpoint = V1_FACE_AUTH_ENDPOINT
             body['faces'] = []
@@ -166,7 +169,6 @@ class Auth(AbstractRequestGenerator):
                 body['faces'].append(self.encode_biometric(face))
 
         elif self.auth_type == 'voice':
-            self.do_request(V1_VOICE_TOKEN_ENDPOINT, {'tokentype': self.token})
             endpoint = V1_VOICE_AUTH_ENDPOINT
             body['voices'] = []
             for voice in self.biometrics:
@@ -229,13 +231,14 @@ class Token(AbstractRequestGenerator):
         self.token = options.get('--token')
 
     def run(self):
-        if self.auth_type == 'voice':
-            payload = self.do_request(
-                V1_VOICE_TOKEN_ENDPOINT,
-                {'tokentype': self.token}
-            )
+        endpoint = ''
+        if self.auth_type == 'face':
+            endpoint = V1_FACE_TOKEN_ENDPOINT
+        elif self.auth_type == 'voice':
+            endpoint = V1_VOICE_TOKEN_ENDPOINT
 
-            print payload
+        payload = self.do_request(endpoint, {'tokentype': self.token})
+        print payload
 
 
 class Session(AbstractRequestGenerator):

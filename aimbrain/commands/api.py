@@ -160,15 +160,16 @@ class Auth(AbstractRequestGenerator):
     def run(self):
         body = {}
         endpoint = ''
-        self.do_request(V1_VOICE_TOKEN_ENDPOINT, {'tokentype': self.token})
 
         if self.auth_type == 'face':
+            print self.do_request(V1_FACE_TOKEN_ENDPOINT, {'tokentype': self.token})
             endpoint = V1_FACE_AUTH_ENDPOINT
             body['faces'] = []
             for face in self.biometrics:
                 body['faces'].append(self.encode_biometric(face))
 
         elif self.auth_type == 'voice':
+            print self.do_request(V1_VOICE_TOKEN_ENDPOINT, {'tokentype': self.token})
             endpoint = V1_VOICE_AUTH_ENDPOINT
             body['voices'] = []
             for voice in self.biometrics:

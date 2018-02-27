@@ -184,6 +184,10 @@ class Auth(AbstractRequestGenerator):
             endpoint = V1_VOICE_AUTH_ENDPOINT
             biometric_key = 'voices'
 
+            # Voice requires token
+            if not self.token:
+                raise SystemExit('A token is required for voice auth')
+
         else:
             # We should never get here...
             raise SystemExit('Unknown auth method "%s"' % self.auth_method)

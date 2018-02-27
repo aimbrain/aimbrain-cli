@@ -5,3 +5,4 @@ aimbrain.egg-info/*
 *.pyc
 build
 dist
+aimbrain_cli.egg-info

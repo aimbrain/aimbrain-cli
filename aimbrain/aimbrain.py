@@ -2,11 +2,11 @@
 aimbrain-cli
 
 Usage:
-  aimbrain-cli auth (face|voice) <biometrics> --user-id=<uid> --api-key=<api_key> --secret=<secret> --token=<token> [--dev|--local]
-  aimbrain-cli compare (face) <biometric1> <biometric2> --user-id=<uid> --api-key=<api_key> --secret=<secret> [--dev|--local]
-  aimbrain-cli enroll (face|voice) <biometrics>... --user-id=<uid> --api-key=<api_key> --secret=<secret> [--dev|--local]
-  aimbrain-cli token (face|voice) --user-id=<uid> --api-key=<api_key> --secret=<secret> [--token=<token>] [--dev|--local]
-  aimbrain-cli session --user-id=<uid> --api-key=<api_key> --secret=<secret> [--dev|--local]
+  aimbrain-cli auth (face|voice) <biometrics> --user-id=<uid> --api-key=<api_key> --secret=<secret> [--token=<token>] [--dev|--local] [--device=<device>] [--system=<system>]
+  aimbrain-cli compare (face) <biometric1> <biometric2> --user-id=<uid> --api-key=<api_key> --secret=<secret> [--dev|--local] [--device=<device>] [--system=<system>]
+  aimbrain-cli enroll (face|voice) <biometrics>... --user-id=<uid> --api-key=<api_key> --secret=<secret> [--dev|--local] [--device=<device>] [--system=<system>]
+  aimbrain-cli token (face|voice) --user-id=<uid> --api-key=<api_key> --secret=<secret> [--token=<token>] [--dev|--local] [--device=<device>] [--system=<system>]
+  aimbrain-cli session --user-id=<uid> --api-key=<api_key> --secret=<secret> [--dev|--local] [--device=<device>] [--system=<system>]
   aimbrain-cli videoconv (blur|brighten|sharpen|contrast) <factor> --in=<input_file> --out=<output_file> --avconv=<avconv> --ffprobe=<ffprobe>
   aimbrain-cli -h | --help
   aimbrain-cli --version
@@ -17,6 +17,8 @@ Options:
     --api-key=<key>                         Your Aimbrain API key
     --secret=<secret>                       Your Aimbrain Secret
     --token=<token>                         Generate specific token for voice auth e.g. enroll-6 for 1-2-3
+    --device=<device>                       Device you are using [default: Generic Phone]
+    --system=<system>                       OS of device [default: Generic OS]
     --dev                                   Toggle to send requests to dev environment: https://dev.aimbrain.com
     --local                                 Toggle to send requests to local environment: http://localhost:8080
 
@@ -29,7 +31,7 @@ Options:
     --version                               Show version.
 
 Examples:
-  aimbrain-cli auth face /path/to/face_image.png --user-id=user --api-key=key --secret=secret --dev
+  aimbrain-cli auth face /path/to/face_image.png --user-id=user --token=enroll-6 --api-key=key --secret=secret --dev
   aimbrain-cli videoconv blur 1.5 --in=/home/aimbrain/auth.mov --out=/home/aimbrain/auth_blur.mov --avconv=/path/to/avconv --ffprobe=/path/to/ffprobe
 
 Help:
@@ -37,9 +39,6 @@ Help:
   https://bitbucket.org/aimbrain/aimbrain-cli
 """
 
-
-from inspect import getmembers
-from inspect import isclass
 
 from docopt import docopt
 

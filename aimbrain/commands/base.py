@@ -1,4 +1,7 @@
 class BaseCommand(object):
+    """
+    BaseCommand represents the bare minimum each command needs to implement.
+    """
     command_id = 'base'
 
     def __init__(self, options, *args, **kwargs):

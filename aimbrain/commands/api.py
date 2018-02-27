@@ -2,14 +2,12 @@ import base64
 import hashlib
 import hmac
 import json
-import sys
 import time
 import urlparse
 
 import requests
 
 from aimbrain.commands.base import BaseCommand
-
 
 V1_SESSIONS_ENDPOINT = '/v1/sessions'
 
@@ -22,8 +20,17 @@ V1_VOICE_AUTH_ENDPOINT = '/v1/voice/auth'
 V1_VOICE_ENROLL_ENDPOINT = '/v1/voice/enroll'
 V1_VOICE_TOKEN_ENDPOINT = '/v1/voice/token'
 
+AIMBRAIN_PROD = 'api.aimbrain.com'
+AIMBRAIN_DEV = 'dev.aimbrain.com'
+LOCAL = 'localhost:8080'
+
 
 class AbstractRequestGenerator(BaseCommand):
+    """
+    Implements all the standard AimBrain functionality such as HMAC
+    signatueres, session generation and performs the requests themselves.
+    """
+
     def __init__(self, options, *args, **kwargs):
         super(AbstractRequestGenerator, self).__init__(options, args, kwargs)
 
@@ -31,27 +38,26 @@ class AbstractRequestGenerator(BaseCommand):
         self.secret = options.get('--secret')
         self.api_key = options.get('--api-key')
 
+        self.device = options.get('--device')
+        self.system = options.get('--system')
+
         self.protocol = 'https'
         self.extra_headers = {}
         if options.get('--dev'):
-            self.base_url = 'dev.aimbrain.com'
+            self.base_url = AIMBRAIN_DEV
         elif options.get('--local'):
             self.protocol = 'http'
-            self.base_url = 'localhost:8080'
+            self.base_url = LOCAL
             self.extra_headers['X-Forwarded-For'] = '127.0.0.1'
         else:
-            self.base_url = 'api.aimbrain.com'
+            self.base_url = AIMBRAIN_PROD
 
         # For debug/errors
         self.raw_session = None
 
-        try:
-            self.session = self.get_session()
-        except Exception:
-            print('Failed to get session, response: %s' % self.raw_session)
-            sys.exit(1)
+        self.session = self.get_session()
 
-        self.auth_type = 'face' if options.get('face') else 'voice'
+        self.auth_method = 'face' if options.get('face') else 'voice'
 
     def get_hmac_sig(self, method, endpoint, body):
         message = '%s\n%s\n%s' % (method.upper(), endpoint.lower(), body)
@@ -75,12 +81,16 @@ class AbstractRequestGenerator(BaseCommand):
     def get_session(self):
         payload = json.dumps({
             'userId': self.user_id,
-            'device': 'Phone',
-            'system': 'Linux'
+            'device': self.device,
+            'system': self.system
         })
 
         session_url = self.get_url(V1_SESSIONS_ENDPOINT)
-        headers = self.get_aimbrain_headers('POST', V1_SESSIONS_ENDPOINT, payload)
+        headers = self.get_aimbrain_headers(
+            'POST',
+            V1_SESSIONS_ENDPOINT,
+            payload
+        )
         start = time.time()
         resp = requests.post(session_url, payload, headers=headers)
         end = time.time() - start
@@ -95,15 +105,14 @@ class AbstractRequestGenerator(BaseCommand):
         except ValueError:
             response_payload = resp.reason
 
-        print '\n[%s][%d][%.2fs] %s\n' % (
+        print('\n[%s][%d][%.2fs] %s\n' % (
             V1_SESSIONS_ENDPOINT,
             resp.status_code,
             end,
             response_payload
-        )
+        ))
         if not session:
-            print 'Failed to get session, got: %s' % resp.text
-            sys.exit(1)
+            raise SystemExit('Failed to get session, got: %s' % resp.text)
 
         return session
 
@@ -150,6 +159,9 @@ class AbstractRequestGenerator(BaseCommand):
 
 
 class Auth(AbstractRequestGenerator):
+    """
+    Implements authentication requests for both face and voice.
+    """
 
     def __init__(self, options, *args, **kwargs):
         super(Auth, self).__init__(options, args, kwargs)
@@ -158,28 +170,38 @@ class Auth(AbstractRequestGenerator):
         self.biometrics = options.get('<biometrics>')
 
     def run(self):
-        body = {}
+        token_endpoint = ''
         endpoint = ''
+        biometric_key = ''
 
-        if self.auth_type == 'face':
-            print self.do_request(V1_FACE_TOKEN_ENDPOINT, {'tokentype': self.token})
+        if self.auth_method == 'face':
+            token_endpoint = V1_FACE_TOKEN_ENDPOINT
             endpoint = V1_FACE_AUTH_ENDPOINT
-            body['faces'] = []
-            for face in self.biometrics:
-                body['faces'].append(self.encode_biometric(face))
+            biometric_key = 'faces'
 
-        elif self.auth_type == 'voice':
-            print self.do_request(V1_VOICE_TOKEN_ENDPOINT, {'tokentype': self.token})
+        elif self.auth_method == 'voice':
+            token_endpoint = V1_VOICE_TOKEN_ENDPOINT
             endpoint = V1_VOICE_AUTH_ENDPOINT
-            body['voices'] = []
-            for voice in self.biometrics:
-                body['voices'].append(self.encode_biometric(voice))
+            biometric_key = 'voices'
 
-        payload = self.do_request(endpoint, body)
-        print payload
+        else:
+            # We should never get here...
+            raise SystemExit('Unknown auth method "%s"' % self.auth_method)
+
+        if self.token:
+            print(self.do_request(token_endpoint, {'tokentype': self.token}))
+
+        body = {biometric_key: []}
+        for biometric in self.biometrics:
+            body[biometric_key].append(self.encode_biometric(biometric))
+
+        print(self.do_request(endpoint, body))
 
 
 class Compare(AbstractRequestGenerator):
+    """
+    Implements authentication requests for face.
+    """
 
     def __init__(self, options, *args, **kwargs):
         super(Compare, self).__init__(options, args, kwargs)
@@ -188,17 +210,19 @@ class Compare(AbstractRequestGenerator):
         self.biometric2 = options.get('<biometric2>')
 
     def run(self):
-        if self.auth_type == 'face':
+        if self.auth_method == 'face':
             body = {
                 'faces1': [self.encode_biometric(self.biometric1)],
                 'faces2': [self.encode_biometric(self.biometric2)]
             }
 
-            payload = self.do_request(V1_FACE_COMPARE_ENDPOINT, body)
-            print payload
+            print(self.do_request(V1_FACE_COMPARE_ENDPOINT, body))
 
 
 class Enroll(AbstractRequestGenerator):
+    """
+    Implements enrollment requests for both face and voice.
+    """
 
     def __init__(self, options, *args, **kwargs):
         super(Enroll, self).__init__(options, args, kwargs)
@@ -207,24 +231,31 @@ class Enroll(AbstractRequestGenerator):
 
     def run(self):
         endpoint = ''
-        body = {}
-        if self.auth_type == 'face':
+        biometric_key = ''
+
+        if self.auth_method == 'face':
             endpoint = V1_FACE_ENROLL_ENDPOINT
-            body['faces'] = []
-            for face in self.biometrics:
-                body['faces'].append(self.encode_biometric(face))
+            biometric_key = 'faces'
 
-        elif self.auth_type == 'voice':
+        elif self.auth_method == 'voice':
             endpoint = V1_VOICE_ENROLL_ENDPOINT
-            body['voices'] = []
-            for voice in self.biometrics:
-                body['voices'].append(self.encode_biometric(voice))
+            biometric_key = 'voices'
 
-        payload = self.do_request(endpoint, body)
-        print payload
+        else:
+            # We should never get here...
+            raise SystemExit('Unknown auth method "%s"' % self.auth_method)
+
+        body = {biometric_key: []}
+        for biometric in self.biometrics:
+            body[biometric_key].append(self.encode_biometric(biometric))
+
+        print(self.do_request(endpoint, body))
 
 
 class Token(AbstractRequestGenerator):
+    """
+    Implements token requests for both face and voice.
+    """
 
     def __init__(self, options, *args, **kwargs):
         super(Token, self).__init__(options, args, kwargs)
@@ -233,16 +264,18 @@ class Token(AbstractRequestGenerator):
 
     def run(self):
         endpoint = ''
-        if self.auth_type == 'face':
+        if self.auth_method == 'face':
             endpoint = V1_FACE_TOKEN_ENDPOINT
-        elif self.auth_type == 'voice':
+        elif self.auth_method == 'voice':
             endpoint = V1_VOICE_TOKEN_ENDPOINT
 
-        payload = self.do_request(endpoint, {'tokentype': self.token})
-        print payload
+        print(self.do_request(endpoint, {'tokentype': self.token}))
 
 
 class Session(AbstractRequestGenerator):
+    """
+    Implements session requests for both face and voice.
+    """
 
     def run(self):
         pass

@@ -1,4 +1,5 @@
 import json
+import os
 import subprocess
 
 from PIL import Image
@@ -61,7 +62,14 @@ class VideoCaptureService(object):
         if self.is_opened():
             self.release()
 
-        cmd = [self.convert_command, '-loglevel', 'error', '-i', self.filename]
+        cmd = [
+            self.convert_command,
+            '-y',
+            '-loglevel',
+            'error',
+            '-i',
+            self.filename
+        ]
         if self.resize:
             cmd += ['-vf', 'scale=%d:%d' % (self.width, self.height)]
 
@@ -137,3 +145,52 @@ class VideoCaptureService(object):
         output = subprocess.check_output(cmd, universal_newlines=True)
 
         return json.loads(output)
+
+
+class AudioExtractor(object):
+
+    def __exit__(self, type, value, traceback):
+        terminated = self.proc.poll()
+        if terminated is None:
+            self.proc.kill()
+
+        self.proc = None
+        self.buf = None
+        self.resize = False
+
+    def __enter__(self):
+        return self
+
+    def __init__(self, in_filename, out_filename, avconv):
+        self.in_filename = in_filename
+        self.out_filename = out_filename
+        self.convert_command = avconv
+        self.proc = None
+
+    def read_wav(self):
+        return wav.read(self.out_filename)
+
+    def read_binary(self):
+        data = ''
+        with open(self.out_filename, 'rb') as f:
+            data = f.read()
+
+        return data
+
+    def extract(self, rate=16000):
+        cmd = '{} -y -i {} -f wav -ar {} -ac 1 -vn {} -loglevel error'.format(
+            self.convert_command,
+            self.in_filename,
+            int(rate),
+            self.out_filename
+        )
+
+        self.proc = subprocess.Popen(cmd.split(' '), stdout=subprocess.PIPE)
+        code = self.proc.wait()
+        if code != 0:
+            raise DecodeError(
+                'Failed to extract audio from video, return code %d' % code
+            )
+
+        if not os.path.exists(self.out_filename):
+            raise DecodeError('Failed to extract audio from video')

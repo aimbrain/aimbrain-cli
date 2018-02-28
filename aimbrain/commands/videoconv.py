@@ -1,3 +1,6 @@
+import os
+import subprocess
+
 import cv2
 import numpy
 from PIL import Image
@@ -5,6 +8,7 @@ from PIL import ImageEnhance
 from PIL import ImageFilter
 
 from aimbrain.commands.base import BaseCommand
+from aimbrain.commands.utils.video_reader import AudioExtractor
 from aimbrain.commands.utils.video_reader import VideoCaptureService
 
 
@@ -42,6 +46,12 @@ class VideoConv(BaseCommand):
 
         return frames, width, height
 
+    def get_audio_file(self, audio_file='/tmp/audio.wav'):
+        with AudioExtractor(self.input, audio_file, self.avconv) as ae:
+            ae.extract()
+
+        return audio_file
+
     def sharpen_video(self, frames):
         sharpened_frames = []
         for frame in frames:
@@ -75,10 +85,10 @@ class VideoConv(BaseCommand):
 
         return blurred_frames
 
-    def build_video(self, frames, width, height):
+    def build_video(self, frames, width, height, video_file='/tmp/video.avi'):
         # Create the OpenCV VideoWriter
         video = cv2.VideoWriter(
-            self.output,
+            video_file,
             cv2.VideoWriter_fourcc(*"XVID"),
             30.0,
             (width, height),
@@ -89,9 +99,29 @@ class VideoConv(BaseCommand):
             video.write(cv2.cvtColor(numpy.array(frame), cv2.COLOR_RGB2BGR))
 
         video.release()
+        return video_file
+
+    def combine_video_and_audio(self, video_file, audio_file):
+        cmd = [
+            self.avconv,
+            '-y',
+            '-i',
+            video_file,
+            '-i',
+            audio_file,
+            '-c',
+            'copy',
+            self.output,
+            '-loglevel',
+            'error'
+        ]
+
+        proc = subprocess.Popen(cmd, stdout=subprocess.PIPE)
+        proc.wait()
 
     def run(self):
         frames, width, height = self.get_video_data()
+        audio_file = self.get_audio_file()
 
         if self.brighten:
             frames = self.brighten_video(frames)
@@ -105,4 +135,5 @@ class VideoConv(BaseCommand):
         elif self.contrast:
             frames = self.contrast_video(frames)
 
-        self.build_video(frames, width, height)
+        video_file = self.build_video(frames, width, height)
+        self.combine_video_and_audio(video_file, audio_file)

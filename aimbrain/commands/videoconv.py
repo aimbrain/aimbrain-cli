@@ -1,9 +1,7 @@
-import os
 import subprocess
 
 import cv2
 import numpy
-from PIL import Image
 from PIL import ImageEnhance
 from PIL import ImageFilter
 
@@ -30,7 +28,7 @@ class VideoConv(BaseCommand):
         self.factor = float(options.get('<factor>'))
 
     def get_video_data(self):
-        frames =  []
+        frames = []
         width = None
         height = None
         with VideoCaptureService(self.input, self.avconv, self.ffprobe) as vcs:

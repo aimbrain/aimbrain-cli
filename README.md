@@ -8,7 +8,11 @@ AimBrain's API endpoints quickly and easily.
 In order to install the CLI locally (on Linux), just clone the repo and do:
 
 ```
-sudo pip install --prefix /usr/local .
+virtualenv /path/to/envs/aimbrain-cli
+source /path/to/envs/aimbrain-cli/bin/activate
+pip install .
+cp /path/to/envs/aimbrain-cli/bin/aimbrain-cli /usr/bin/aimbrain-cli
+deactivate
 ```
 
 However, if you wish to do some dev work on it, it is recomended to run the

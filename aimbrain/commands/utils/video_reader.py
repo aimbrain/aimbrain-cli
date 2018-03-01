@@ -1,6 +1,7 @@
 import json
 import os
 import subprocess
+import wav
 
 from PIL import Image
 
@@ -124,7 +125,11 @@ class VideoCaptureService(object):
                 'read %d' % (nbytes, len(self.buf))
             )
 
-        image = Image.frombytes('RGB', (self.width, self.height), self.buf[:nbytes])
+        image = Image.frombytes(
+            'RGB',
+            (self.width, self.height),
+            self.buf[:nbytes]
+        )
         self.buf = b''
 
         # If there is data left over, move it to beginning of buffer for next
@@ -188,9 +193,9 @@ class AudioExtractor(object):
         self.proc = subprocess.Popen(cmd.split(' '), stdout=subprocess.PIPE)
         code = self.proc.wait()
         if code != 0:
-            raise DecodeError(
+            raise SystemExit(
                 'Failed to extract audio from video, return code %d' % code
             )
 
         if not os.path.exists(self.out_filename):
-            raise DecodeError('Failed to extract audio from video')
+            raise SystemExit('Failed to extract audio from video')

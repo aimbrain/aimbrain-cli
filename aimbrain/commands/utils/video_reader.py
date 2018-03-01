@@ -1,7 +1,8 @@
 import json
 import os
 import subprocess
-import wav
+
+import scipy.io.wavfile as wav
 
 from PIL import Image
 

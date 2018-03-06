@@ -2,7 +2,9 @@
 
 
 from codecs import open
-from os.path import abspath, dirname, join
+from os.path import abspath
+from os.path import dirname
+from os.path import join
 from subprocess import call
 
 from setuptools import Command

@@ -2,6 +2,7 @@ import base64
 import hashlib
 import hmac
 import json
+import os
 import time
 import urlparse
 
@@ -168,6 +169,8 @@ class Auth(AbstractRequestGenerator):
 
         self.token = options.get('--token')
         self.biometrics = options.get('<biometrics>')
+        if not os.path.exists(self.biometrics):
+            raise SystemExit('"%s" path does not exist' % self.biometrics)
 
     def run(self):
         token_endpoint = ''
@@ -212,6 +215,11 @@ class Compare(AbstractRequestGenerator):
 
         self.biometric1 = options.get('<biometric1>')
         self.biometric2 = options.get('<biometric2>')
+        if not os.path.exists(self.biometric1):
+            raise SystemExit('"%s" path does not exist' % self.biometric1)
+
+        if not os.path.exists(self.biometric2):
+            raise SystemExit('"%s" path does not exist' % self.biometric2)
 
     def run(self):
         if self.auth_method == 'face':
@@ -232,6 +240,8 @@ class Enroll(AbstractRequestGenerator):
         super(Enroll, self).__init__(options, args, kwargs)
 
         self.biometrics = options.get('<biometrics>')
+        if not os.path.exists(self.biometrics):
+            raise SystemExit('"%s" path does not exist' % self.biometrics)
 
     def run(self):
         endpoint = ''

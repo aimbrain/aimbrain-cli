@@ -2,11 +2,11 @@
 aimbrain-cli
 
 Usage:
-  aimbrain-cli auth (face|voice) <biometrics> --user-id=<uid> --api-key=<api_key> --secret=<secret> [--token=<token>] [--dev|--local] [--device=<device>] [--system=<system>]
-  aimbrain-cli compare (face) <biometric1> <biometric2> --user-id=<uid> --api-key=<api_key> --secret=<secret> [--dev|--local] [--device=<device>] [--system=<system>]
-  aimbrain-cli enroll (face|voice) <biometrics>... --user-id=<uid> --api-key=<api_key> --secret=<secret> [--dev|--local] [--device=<device>] [--system=<system>]
-  aimbrain-cli token (face|voice) --user-id=<uid> --api-key=<api_key> --secret=<secret> [--token=<token>] [--dev|--local] [--device=<device>] [--system=<system>]
-  aimbrain-cli session --user-id=<uid> --api-key=<api_key> --secret=<secret> [--dev|--local] [--device=<device>] [--system=<system>]
+  aimbrain-cli auth (face|voice) <biometrics> --user-id=<uid> --api-key=<api_key> --secret=<secret> [--token=<token>] [--api-url=<api_url>] [--device=<device>] [--system=<system>]
+  aimbrain-cli compare (face) <biometric1> <biometric2> --user-id=<uid> --api-key=<api_key> --secret=<secret> [--api-url=<api_url>] [--device=<device>] [--system=<system>]
+  aimbrain-cli enroll (face|voice) <biometrics>... --user-id=<uid> --api-key=<api_key> --secret=<secret> [--api-url=<api_url>] [--device=<device>] [--system=<system>]
+  aimbrain-cli token (face|voice) --user-id=<uid> --api-key=<api_key> --secret=<secret> [--token=<token>] [--api-url=<api_url>] [--device=<device>] [--system=<system>]
+  aimbrain-cli session --user-id=<uid> --api-key=<api_key> --secret=<secret> [--api-url=<api_url>] [--device=<device>] [--system=<system>]
   aimbrain-cli videoconv (blur|brighten|sharpen|contrast) <factor> --in=<input_file> --out=<output_file> --avconv=<avconv> --ffprobe=<ffprobe>
   aimbrain-cli -h | --help
   aimbrain-cli --version
@@ -19,8 +19,7 @@ Options:
     --token=<token>                         Generate specific token for voice auth e.g. enroll-6 for 1-2-3
     --device=<device>                       Device you are using [default: Generic Phone]
     --system=<system>                       OS of device [default: Generic OS]
-    --dev                                   Toggle to send requests to dev environment: https://dev.aimbrain.com
-    --local                                 Toggle to send requests to local environment: http://localhost:8080
+    --api-url=<api_url>                     URL to send requests to [default: https://api.aimbrain.com]
 
   VideoConv:
     --in=<input_file>/--out=<output_file>   Input/Output file for videoconv

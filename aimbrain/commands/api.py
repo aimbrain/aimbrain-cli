@@ -21,10 +21,6 @@ V1_VOICE_AUTH_ENDPOINT = '/v1/voice/auth'
 V1_VOICE_ENROLL_ENDPOINT = '/v1/voice/enroll'
 V1_VOICE_TOKEN_ENDPOINT = '/v1/voice/token'
 
-AIMBRAIN_PROD = 'api.aimbrain.com'
-AIMBRAIN_DEV = 'dev.aimbrain.com'
-LOCAL = 'localhost:8080'
-
 
 class AbstractRequestGenerator(BaseCommand):
     """
@@ -42,16 +38,10 @@ class AbstractRequestGenerator(BaseCommand):
         self.device = options.get('--device')
         self.system = options.get('--system')
 
-        self.protocol = 'https'
         self.extra_headers = {}
-        if options.get('--dev'):
-            self.base_url = AIMBRAIN_DEV
-        elif options.get('--local'):
-            self.protocol = 'http'
-            self.base_url = LOCAL
+        self.base_url = options.get('--api-url')
+        if 'localhost' in self.base_url:
             self.extra_headers['X-Forwarded-For'] = '127.0.0.1'
-        else:
-            self.base_url = AIMBRAIN_PROD
 
         # For debug/errors
         self.raw_session = None
@@ -70,9 +60,13 @@ class AbstractRequestGenerator(BaseCommand):
         ).digest())
 
     def get_url(self, endpoint):
+        url_params = urlparse.urlparse(self.base_url)
+        if not url_params[0]:
+            raise SystemExit('--api-url requires a scheme e.g. http')
+
         return urlparse.urlunparse((
-            self.protocol,
-            self.base_url,
+            url_params[0],
+            url_params[1],
             endpoint,
             '',
             '',
@@ -169,8 +163,9 @@ class Auth(AbstractRequestGenerator):
 
         self.token = options.get('--token')
         self.biometrics = options.get('<biometrics>')
-        if not os.path.exists(self.biometrics):
-            raise SystemExit('"%s" path does not exist' % self.biometrics)
+        for biometric in self.biometrics:
+            if not os.path.exists(biometric):
+                raise SystemExit('"%s" path does not exist' % biometric)
 
     def run(self):
         token_endpoint = ''
@@ -240,8 +235,9 @@ class Enroll(AbstractRequestGenerator):
         super(Enroll, self).__init__(options, args, kwargs)
 
         self.biometrics = options.get('<biometrics>')
-        if not os.path.exists(self.biometrics):
-            raise SystemExit('"%s" path does not exist' % self.biometrics)
+        for biometric in self.biometrics:
+            if not os.path.exists(biometric):
+                raise SystemExit('"%s" path does not exist' % biometric)
 
     def run(self):
         endpoint = ''

@@ -47,12 +47,12 @@ setup(
     keywords='cli',
     packages=['aimbrain', 'aimbrain.commands', 'aimbrain.commands.utils'],
     install_requires=[
-        'docopt',
-        'opencv-python',
-        'requests',
-        'numpy',
-        'pillow',
-        'scipy'
+        'docopt==0.6.2',
+        'opencv-python==3.4.0.12',
+        'requests==2.18.4',
+        'numpy==1.14.0',
+        'pillow==5.0.0',
+        'scipy==1.0.0'
     ],
     extras_require={'test': ['coverage', 'pytest', 'pytest-cov']},
     entry_points='''

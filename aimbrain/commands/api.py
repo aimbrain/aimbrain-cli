@@ -115,7 +115,12 @@ class AbstractRequestGenerator(BaseCommand):
         """
 
         start = time.time()
-        resp = requests.post(url, payload, headers=headers)
+        resp = None
+        try:
+            resp = requests.post(url, payload, headers=headers)
+        except requests.exceptions.ConnectionError:
+            raise SystemExit('Unable to connect to url "%s"' % url)
+
         end = time.time() - start
 
         return resp, end

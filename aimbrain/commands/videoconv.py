@@ -28,6 +28,10 @@ class VideoConv(BaseCommand):
         self.factor = float(options.get('<factor>'))
 
     def get_video_data(self):
+        """
+        Get frames, width and height of video
+        """
+
         frames = []
         width = None
         height = None
@@ -45,12 +49,25 @@ class VideoConv(BaseCommand):
         return frames, width, height
 
     def get_audio_file(self, audio_file='/tmp/audio.wav'):
+        """
+        Get audio from input, store it and return location
+
+        Optional Arguments:
+        audio_file <string> --- Path to output audio to
+        """
+
         with AudioExtractor(self.input, audio_file, self.avconv) as ae:
             ae.extract()
 
         return audio_file
 
     def sharpen_video(self, frames):
+        """
+        Sharpen the video frames
+
+        Arguments:
+        frames <list> --- List of images
+        """
         sharpened_frames = []
         for frame in frames:
             enhancer = ImageEnhance.Sharpness(frame)
@@ -59,6 +76,13 @@ class VideoConv(BaseCommand):
         return sharpened_frames
 
     def brighten_video(self, frames):
+        """
+        Brighten the video frames
+
+        Arguments:
+        frames <list> --- List of images
+        """
+
         brightened_frames = []
         for frame in frames:
             enhancer = ImageEnhance.Brightness(frame)
@@ -67,6 +91,13 @@ class VideoConv(BaseCommand):
         return brightened_frames
 
     def contrast_video(self, frames):
+        """
+        Change the video frames contrast
+
+        Arguments:
+        frames <list> --- List of images
+        """
+
         contrasted_frames = []
         for frame in frames:
             enhancer = ImageEnhance.Contrast(frame)
@@ -75,6 +106,13 @@ class VideoConv(BaseCommand):
         return contrasted_frames
 
     def blur_video(self, frames):
+        """
+        Blur the video frames
+
+        Arguments:
+        frames <list> --- List of images
+        """
+
         blurred_frames = []
         for frame in frames:
             blurred_frames.append(
@@ -84,6 +122,18 @@ class VideoConv(BaseCommand):
         return blurred_frames
 
     def build_video(self, frames, width, height, video_file='/tmp/video.avi'):
+        """
+        Create a video from the given frames at a certain width and height
+
+        Arguments:
+        frames <list> --- List of images
+        width <float> --- Width of desired video
+        height <float> --- Height of desired video
+
+        Optional Arguments:
+        video_file <string> --- Path to output video file to
+        """
+
         # Create the OpenCV VideoWriter
         video = cv2.VideoWriter(
             video_file,
@@ -100,6 +150,14 @@ class VideoConv(BaseCommand):
         return video_file
 
     def combine_video_and_audio(self, video_file, audio_file):
+        """
+        Combine the video and audio files to create the final product
+
+        Arguments:
+        video_file <string> --- Path to a video file
+        audio_file <string> --- Path to a audio file
+        """
+
         cmd = [
             self.avconv,
             '-y',
@@ -121,6 +179,7 @@ class VideoConv(BaseCommand):
         frames, width, height = self.get_video_data()
         audio_file = self.get_audio_file()
 
+        print('Running videoconv operation')
         if self.brighten:
             frames = self.brighten_video(frames)
 
@@ -135,3 +194,4 @@ class VideoConv(BaseCommand):
 
         video_file = self.build_video(frames, width, height)
         self.combine_video_and_audio(video_file, audio_file)
+        print('Completed videoconv operation')

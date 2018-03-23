@@ -350,4 +350,4 @@ class Session(AbstractRequestGenerator):
     """
 
     def run(self):
-        pass
+        self.get_session()

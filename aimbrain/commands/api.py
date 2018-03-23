@@ -40,13 +40,17 @@ class AbstractRequestGenerator(BaseCommand):
 
         self.extra_headers = {}
         self.base_url = options.get('--api-url', '')
+        if not self.base_url:
+            # This should never happen...
+            raise SystemExit('No API URL supplied, should be caught by docopt')
+
         if 'localhost' in self.base_url:
             self.extra_headers['X-Forwarded-For'] = '127.0.0.1'
 
         self.auth_method = 'face' if options.get('face') else 'voice'
         self.session = None
 
-    def get_hmac_sig(self, method, endpoint, payload):
+    def get_hmac(self, method, endpoint, payload):
         """
         Generate a HMAC signature
 
@@ -76,7 +80,7 @@ class AbstractRequestGenerator(BaseCommand):
 
         headers = {
             'X-Aimbrain-Apikey': self.api_key,
-            'X-Aimbrain-Signature': self.get_hmac_sig(method, endpoint, payload),
+            'X-Aimbrain-Signature': self.get_hmac(method, endpoint, payload),
         }
 
         headers.update(self.extra_headers)
@@ -191,7 +195,7 @@ class AbstractRequestGenerator(BaseCommand):
         Encode the biometric asset (image, video, audio) to base64
 
         Arguments:
-        biometric_path <string> -- file path to asset 
+        biometric_path <string> -- file path to asset
         """
         if not os.path.exists(biometric_path):
             raise SystemExit('"%s" path does not exist' % biometric_path)

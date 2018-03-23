@@ -11,10 +11,13 @@ from aimbrain.commands.api import AbstractRequestGenerator
 class TestBaseAPI(unittest2.TestCase):
 
     def test_hmac_signature_generation(self):
-        options = {'--secret': 'bannanaman'}
+        options = {
+            '--secret': 'bannanaman',
+            '--api-url': 'https://api.aimbrain.com'
+        }
         self.api = AbstractRequestGenerator(options)
 
-        test_sig = self.api.get_hmac_sig(
+        test_sig = self.api.get_hmac(
             'POST',
             '/potato',
             '{"hello": "Mr Blobby"}',
@@ -74,7 +77,8 @@ class TestBaseAPI(unittest2.TestCase):
             test_session = self.api.get_session()
 
     def test_biometric_encoding(self):
-        self.api = AbstractRequestGenerator({})
+        options = {'--api-url': 'https://api.aimbrain.com'}
+        self.api = AbstractRequestGenerator(options)
 
         with NamedTemporaryFile('w+b') as f:
             f.write('boop')
@@ -83,7 +87,8 @@ class TestBaseAPI(unittest2.TestCase):
             self.assertEquals('Ym9vcA==', encoding)
 
     def test_biometric_encoding_non_existant_file(self):
-        self.api = AbstractRequestGenerator({})
+        options = {'--api-url': 'https://api.aimbrain.com'}
+        self.api = AbstractRequestGenerator(options)
 
         with self.assertRaises(SystemExit):
-            self.api.encode_biometric('ifthisfileexistsyouhaveissuesmate')
+            self.api.encode_biometric('ifthisfileexistsyouhaveissuesm8')

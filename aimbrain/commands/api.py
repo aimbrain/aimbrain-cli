@@ -39,19 +39,24 @@ class AbstractRequestGenerator(BaseCommand):
         self.system = options.get('--system')
 
         self.extra_headers = {}
-        self.base_url = options.get('--api-url')
+        self.base_url = options.get('--api-url', '')
         if 'localhost' in self.base_url:
             self.extra_headers['X-Forwarded-For'] = '127.0.0.1'
 
-        # For debug/errors
-        self.raw_session = None
-
-        self.session = self.get_session()
-
         self.auth_method = 'face' if options.get('face') else 'voice'
+        self.session = None
 
-    def get_hmac_sig(self, method, endpoint, body):
-        message = '%s\n%s\n%s' % (method.upper(), endpoint.lower(), body)
+    def get_hmac_sig(self, method, endpoint, payload):
+        """
+        Generate a HMAC signature
+
+        Arguments:
+        method <string> -- HTTP method e.g. GET, POST
+        endpoint <string> -- HTTP endpoint request is being sent to
+        payload <string> -- JSON encoded body of request
+        """
+
+        message = '%s\n%s\n%s' % (method.upper(), endpoint.lower(), payload)
 
         return base64.b64encode(hmac.new(
             self.secret.encode('utf-8'),
@@ -59,7 +64,33 @@ class AbstractRequestGenerator(BaseCommand):
             digestmod=hashlib.sha256,
         ).digest())
 
+    def get_aimbrain_headers(self, method, endpoint, payload):
+        """
+        Get headers needed for AimBrain API request and any additional ones
+
+        Arguments:
+        method <string> -- HTTP method e.g. GET, POST
+        endpoint <string> -- HTTP endpoint request is being sent to
+        payload <string> -- JSON encoded body of request
+        """
+
+        headers = {
+            'X-Aimbrain-Apikey': self.api_key,
+            'X-Aimbrain-Signature': self.get_hmac_sig(method, endpoint, payload),
+        }
+
+        headers.update(self.extra_headers)
+
+        return headers
+
     def get_url(self, endpoint):
+        """
+        Generate a full URL for a particular endpoint
+
+        Arguments:
+        endpoint <string> -- HTTP endpoint request is being sent to
+        """
+
         url_params = urlparse.urlparse(self.base_url)
         if not url_params[0]:
             raise SystemExit('--api-url requires a scheme e.g. http')
@@ -73,55 +104,93 @@ class AbstractRequestGenerator(BaseCommand):
             '',
         ))
 
+    def post(self, url, payload, headers):
+        """
+        POST a request to a URL
+
+        Arguments:
+        url <string> -- HTTP method e.g. GET, POST
+        endpoint <string> -- HTTP endpoint request is being sent to
+        headers <dict> -- Dictionary of header keys to values
+        """
+
+        start = time.time()
+        resp = requests.post(url, payload, headers=headers)
+        end = time.time() - start
+
+        return resp, end
+
+    def get_response_payload(self, endpoint, payload):
+        """
+        Send a request to AimBrain API and return JSON response
+
+        Arguments:
+        endpoint <string> -- HTTP endpoint request is being sent to
+        payload <string> -- JSON encoded body of request
+        """
+
+        url = self.get_url(endpoint)
+        headers = self.get_aimbrain_headers(
+            'POST',
+            endpoint,
+            payload
+        )
+
+        resp, end = self.post(url, payload, headers)
+
+        response_payload = ''
+        try:
+            response_payload = resp.json()
+        except ValueError:
+            pass
+
+        print('\n[%s][%d][%.2fs] %s\n' % (
+            endpoint,
+            resp.status_code,
+            end,
+            response_payload or resp.text
+        ))
+
+        if not response_payload:
+            raise SystemExit('Failed to get session, got: %s' % resp.text)
+
+        return response_payload
+
     def get_session(self):
+        """
+        Get session for this request batch
+        """
+
+        if self.session:
+            return self.session
+
         payload = json.dumps({
             'userId': self.user_id,
             'device': self.device,
             'system': self.system
         })
 
-        session_url = self.get_url(V1_SESSIONS_ENDPOINT)
-        headers = self.get_aimbrain_headers(
-            'POST',
+        response_payload = self.get_response_payload(
             V1_SESSIONS_ENDPOINT,
             payload
         )
-        start = time.time()
-        resp = requests.post(session_url, payload, headers=headers)
-        end = time.time() - start
-        self.raw_session = resp.text
 
-        response_payload = ''
-        session = ''
+        self.session = response_payload.get('session')
+        if not self.session:
+            raise SystemExit('Failed to get session')
 
-        try:
-            response_payload = resp.json()
-            session = response_payload.get('session')
-        except ValueError:
-            response_payload = resp.reason
-
-        print('\n[%s][%d][%.2fs] %s\n' % (
-            V1_SESSIONS_ENDPOINT,
-            resp.status_code,
-            end,
-            response_payload
-        ))
-        if not session:
-            raise SystemExit('Failed to get session, got: %s' % resp.text)
-
-        return session
-
-    def get_aimbrain_headers(self, method, endpoint, body):
-        headers = {
-            'X-Aimbrain-Apikey': self.api_key,
-            'X-Aimbrain-Signature': self.get_hmac_sig(method, endpoint, body),
-        }
-
-        headers.update(self.extra_headers)
-
-        return headers
+        return self.session
 
     def encode_biometric(self, biometric_path):
+        """
+        Encode the biometric asset (image, video, audio) to base64
+
+        Arguments:
+        biometric_path <string> -- file path to asset 
+        """
+        if not os.path.exists(biometric_path):
+            raise SystemExit('"%s" path does not exist' % biometric_path)
+
         encoded = None
         with open(biometric_path, 'rb') as f:
             image = f.read()
@@ -129,28 +198,19 @@ class AbstractRequestGenerator(BaseCommand):
 
         return encoded
 
-    def do_request(self, endpoint, body):
-        body['session'] = self.session
-        payload = json.dumps(body)
-        headers = self.get_aimbrain_headers('POST', endpoint, payload)
-        request_url = self.get_url(endpoint)
+    def do_request(self, endpoint, body, require_session=True):
+        """
+        Send a request to AimBrain API
 
-        now = time.time()
-        resp = requests.post(request_url, payload, headers=headers)
-        end = time.time() - now
+        Arguments:
+        endpoint <string> -- HTTP endpoint request is being sent to
+        body <dict> -- Body of request
+        """
 
-        response_payload = ''
-        try:
-            response_payload = resp.json()
-        except ValueError:
-            response_payload = resp.reason
+        if require_session:
+            body['session'] = self.get_session()
 
-        return '\n[%s][%d][%.2fs] %s\n' % (
-            endpoint,
-            resp.status_code,
-            end,
-            response_payload
-        )
+        self.get_response_payload(endpoint, json.dumps(body))
 
 
 class Auth(AbstractRequestGenerator):
@@ -163,9 +223,6 @@ class Auth(AbstractRequestGenerator):
 
         self.token = options.get('--token')
         self.biometrics = options.get('<biometrics>')
-        for biometric in self.biometrics:
-            if not os.path.exists(biometric):
-                raise SystemExit('"%s" path does not exist' % biometric)
 
     def run(self):
         token_endpoint = ''
@@ -191,13 +248,13 @@ class Auth(AbstractRequestGenerator):
             raise SystemExit('Unknown auth method "%s"' % self.auth_method)
 
         if self.token:
-            print(self.do_request(token_endpoint, {'tokentype': self.token}))
+            self.do_request(token_endpoint, {'tokentype': self.token})
 
         body = {biometric_key: []}
         for biometric in self.biometrics:
             body[biometric_key].append(self.encode_biometric(biometric))
 
-        print(self.do_request(endpoint, body))
+        self.do_request(endpoint, body)
 
 
 class Compare(AbstractRequestGenerator):
@@ -210,11 +267,6 @@ class Compare(AbstractRequestGenerator):
 
         self.biometric1 = options.get('<biometric1>')
         self.biometric2 = options.get('<biometric2>')
-        if not os.path.exists(self.biometric1):
-            raise SystemExit('"%s" path does not exist' % self.biometric1)
-
-        if not os.path.exists(self.biometric2):
-            raise SystemExit('"%s" path does not exist' % self.biometric2)
 
     def run(self):
         if self.auth_method == 'face':
@@ -223,7 +275,11 @@ class Compare(AbstractRequestGenerator):
                 'faces2': [self.encode_biometric(self.biometric2)]
             }
 
-            print(self.do_request(V1_FACE_COMPARE_ENDPOINT, body))
+            self.do_request(
+                V1_FACE_COMPARE_ENDPOINT,
+                body,
+                require_session=False,
+            )
 
 
 class Enroll(AbstractRequestGenerator):
@@ -235,9 +291,6 @@ class Enroll(AbstractRequestGenerator):
         super(Enroll, self).__init__(options, args, kwargs)
 
         self.biometrics = options.get('<biometrics>')
-        for biometric in self.biometrics:
-            if not os.path.exists(biometric):
-                raise SystemExit('"%s" path does not exist' % biometric)
 
     def run(self):
         endpoint = ''
@@ -259,7 +312,7 @@ class Enroll(AbstractRequestGenerator):
         for biometric in self.biometrics:
             body[biometric_key].append(self.encode_biometric(biometric))
 
-        print(self.do_request(endpoint, body))
+        self.do_request(endpoint, body)
 
 
 class Token(AbstractRequestGenerator):
@@ -279,7 +332,7 @@ class Token(AbstractRequestGenerator):
         elif self.auth_method == 'voice':
             endpoint = V1_VOICE_TOKEN_ENDPOINT
 
-        print(self.do_request(endpoint, {'tokentype': self.token}))
+        self.do_request(endpoint, {'tokentype': self.token})
 
 
 class Session(AbstractRequestGenerator):

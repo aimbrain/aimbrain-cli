@@ -40,7 +40,7 @@ setup(
     version=__version__,
     description='A CLI to run common aimbrain tasks.',
     long_description=long_description,
-    url='https://bitbucket.org/aimbrain/aimbrain-cli',
+    url='https://github.com/aimbrain/aimbrain-cli',
     author='Sam Lacey',
     author_email='sam@aimbrain.com',
     license='MIT',
@@ -52,7 +52,10 @@ setup(
         'requests==2.18.4',
         'numpy==1.14.0',
         'pillow==5.0.0',
-        'scipy==1.0.0'
+        'scipy==1.0.0',
+        'unittest2==1.1.0',
+        'pytest==3.4.2',
+        'mock==2.0.0',
     ],
     extras_require={'test': ['coverage', 'pytest', 'pytest-cov']},
     entry_points='''

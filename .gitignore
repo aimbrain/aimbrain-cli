@@ -6,3 +6,5 @@ aimbrain.egg-info/*
 build
 dist
 aimbrain_cli.egg-info
+.cache
+.pytest_cache

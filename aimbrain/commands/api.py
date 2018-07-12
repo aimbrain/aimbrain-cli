@@ -341,11 +341,10 @@ class BehaviouralSubmit(AbstractRequestGenerator):
         endpoint = V1_BEHAVIOURAL_SUBMIT
         if not os.path.exists(self.data):
             raise SystemExit('Data file does not exist - "%s"' % self.data)
-        f = open(self.data)
-        data = json.load(f)
-        f.close()
+        with open(self.data, 'r') as f:
+            data = json.load(f)
+            self.do_request(endpoint, data)
 
-        self.do_request(endpoint, data)
 
 class Token(AbstractRequestGenerator):
     """

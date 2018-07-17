@@ -335,7 +335,7 @@ class BehaviouralSubmit(AbstractRequestGenerator):
     def __init__(self, options, *args, **kwargs):
         super(BehaviouralSubmit, self).__init__(options, args, kwargs)
 
-        self.data = options.get('--data')
+        self.data = options.get('<data>')
 
     def run(self):
         endpoint = V1_BEHAVIOURAL_SUBMIT

@@ -3,7 +3,7 @@ aimbrain-cli
 
 Usage:
   aimbrain-cli auth (face|voice) <biometrics> --user-id=<uid> --api-key=<api_key> --secret=<secret> [--token=<token>] [--api-url=<api_url>] [--device=<device>] [--system=<system>]
-  aimbrain-cli behavioural-submit --user-id=<uid> --api-key=<api_key> --secret=<secret> --data=<data> [--api-url=<api_url>] [--device=<device>] [--system=<system>]
+  aimbrain-cli behavioural-submit <data> --user-id=<uid> --api-key=<api_key> --secret=<secret> [--api-url=<api_url>] [--device=<device>] [--system=<system>]
   aimbrain-cli compare (face) <biometric1> <biometric2> --user-id=<uid> --api-key=<api_key> --secret=<secret> [--api-url=<api_url>] [--device=<device>] [--system=<system>]
   aimbrain-cli enroll (face|voice) <biometrics>... --user-id=<uid> --api-key=<api_key> --secret=<secret> [--api-url=<api_url>] [--device=<device>] [--system=<system>]
   aimbrain-cli token (face|voice) --user-id=<uid> --api-key=<api_key> --secret=<secret> [--token=<token>] [--api-url=<api_url>] [--device=<device>] [--system=<system>]
@@ -17,7 +17,6 @@ Options:
     --user-id=<uid>                         User ID in Aimbrain
     --api-key=<key>                         Your Aimbrain API key
     --secret=<secret>                       Your Aimbrain Secret
-    --data=<data>                           Raw behavioural data file
     --token=<token>                         Generate specific token for voice auth e.g. enroll-6 for 1-2-3
     --device=<device>                       Device you are using [default: Generic Phone]
     --system=<system>                       OS of device [default: Generic OS]

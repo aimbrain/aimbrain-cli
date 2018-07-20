@@ -3,6 +3,7 @@ import hashlib
 import hmac
 import json
 import os
+import os.path
 import time
 import urlparse
 
@@ -20,6 +21,8 @@ V1_FACE_TOKEN_ENDPOINT = '/v1/face/token'
 V1_VOICE_AUTH_ENDPOINT = '/v1/voice/auth'
 V1_VOICE_ENROLL_ENDPOINT = '/v1/voice/enroll'
 V1_VOICE_TOKEN_ENDPOINT = '/v1/voice/token'
+
+V1_BEHAVIOURAL_SUBMIT = '/v1/behavioural/submit'
 
 
 class AbstractRequestGenerator(BaseCommand):
@@ -318,6 +321,25 @@ class Enroll(AbstractRequestGenerator):
             body[biometric_key].append(self.encode_biometric(biometric))
 
         self.do_request(endpoint, body)
+
+
+class BehaviouralSubmit(AbstractRequestGenerator):
+    """
+    Submit behavioural data
+    """
+
+    def __init__(self, options, *args, **kwargs):
+        super(BehaviouralSubmit, self).__init__(options, args, kwargs)
+
+        self.data = options.get('<data>')
+
+    def run(self):
+        endpoint = V1_BEHAVIOURAL_SUBMIT
+        if not os.path.exists(self.data):
+            raise SystemExit('Data file does not exist - "%s"' % self.data)
+        with open(self.data, 'r') as f:
+            data = json.load(f)
+            self.do_request(endpoint, data)
 
 
 class Token(AbstractRequestGenerator):

@@ -3,6 +3,7 @@ aimbrain-cli
 
 Usage:
   aimbrain-cli auth (face|voice) <biometrics> --user-id=<uid> --api-key=<api_key> --secret=<secret> [--token=<token>] [--api-url=<api_url>] [--device=<device>] [--system=<system>]
+  aimbrain-cli behavioural-submit <data> --user-id=<uid> --api-key=<api_key> --secret=<secret> [--api-url=<api_url>] [--device=<device>] [--system=<system>]
   aimbrain-cli compare (face) <biometric1> <biometric2> --user-id=<uid> --api-key=<api_key> --secret=<secret> [--api-url=<api_url>] [--device=<device>] [--system=<system>]
   aimbrain-cli enroll (face|voice) <biometrics>... --user-id=<uid> --api-key=<api_key> --secret=<secret> [--api-url=<api_url>] [--device=<device>] [--system=<system>]
   aimbrain-cli token (face|voice) --user-id=<uid> --api-key=<api_key> --secret=<secret> [--token=<token>] [--api-url=<api_url>] [--device=<device>] [--system=<system>]
@@ -47,6 +48,7 @@ from commands.api import Compare
 from commands.api import Enroll
 from commands.api import Session
 from commands.api import Token
+from commands.api import BehaviouralSubmit
 from commands.videoconv import VideoConv
 
 
@@ -66,5 +68,7 @@ def main():
         cmd = Token(options)
     elif options.get('session'):
         cmd = Session(options)
+    elif options.get('behavioural-submit'):
+        cmd = BehaviouralSubmit(options)
 
     cmd.run()

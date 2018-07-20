@@ -4,8 +4,11 @@ import mock
 import unittest2
 
 from mock import MagicMock
+from mock import patch
 
 from aimbrain.commands.api import AbstractRequestGenerator
+from aimbrain.commands.api import BehaviouralSubmit
+from aimbrain.commands.api import V1_BEHAVIOURAL_SUBMIT
 
 
 class TestBaseAPI(unittest2.TestCase):
@@ -92,3 +95,28 @@ class TestBaseAPI(unittest2.TestCase):
 
         with self.assertRaises(SystemExit):
             self.api.encode_biometric('ifthisfileexistsyouhaveissuesm8')
+
+
+class TestBehaviouralSubmit(unittest2.TestCase):
+    @patch('os.path.exists', return_value=False)
+    def test_run_non_existent(self, exists):
+        options = {
+            '--api-url': 'https://api.aimbrain.com',
+            '--data': '/tmp/test-data.json',
+        }
+        api = BehaviouralSubmit(options)
+        with self.assertRaises(SystemExit):
+            api.run()
+
+    @patch('os.path.exists', return_value=True)
+    @patch('__builtin__.open')
+    @patch('json.load', return_value='test-data')
+    def test_run_exists(self, exists, mopen, jl):
+        options = {
+            '--api-url': 'https://api.aimbrain.com',
+            '--data': '/tmp/test-data.json',
+        }
+        api = BehaviouralSubmit(options)
+        api.do_request = MagicMock()
+        api.run()
+        api.do_request.assert_called_with(V1_BEHAVIOURAL_SUBMIT, 'test-data')

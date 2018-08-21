@@ -5,6 +5,8 @@ AimBrain's API endpoints quickly and easily.
 
 ## Getting Started
 
+For a full setup and usage guide please see https://aimbrain.github.io/aimbrain-api/?shell#setup-the-aimbrain-cli
+
 In order to install the CLI locally (on Linux), just clone the repo and:
 
 ```

@@ -6,6 +6,7 @@ Usage:
   aimbrain-cli behavioural-submit <data> --user-id=<uid> --api-key=<api_key> --secret=<secret> [--api-url=<api_url>] [--device=<device>] [--system=<system>]
   aimbrain-cli compare (face) <biometric1> <biometric2> --user-id=<uid> --api-key=<api_key> --secret=<secret> [--api-url=<api_url>] [--device=<device>] [--system=<system>]
   aimbrain-cli enroll (face|voice) <biometrics>... --user-id=<uid> --api-key=<api_key> --secret=<secret> [--api-url=<api_url>] [--device=<device>] [--system=<system>]
+  aimbrain-cli score --user-id=<uid> --api-key=<api_key> --secret=<secret> [--api-url=<api_url>] [--device=<device>] [--system=<system>] [--session=<session_id>]
   aimbrain-cli token (face|voice) --user-id=<uid> --api-key=<api_key> --secret=<secret> [--token=<token>] [--api-url=<api_url>] [--device=<device>] [--system=<system>]
   aimbrain-cli session --user-id=<uid> --api-key=<api_key> --secret=<secret> [--api-url=<api_url>] [--device=<device>] [--system=<system>]
   aimbrain-cli videoconv (blur|brighten|sharpen|contrast) <factor> --in=<input_file> --out=<output_file> --avconv=<avconv> --ffprobe=<ffprobe>
@@ -47,6 +48,7 @@ from commands.api import Auth
 from commands.api import Compare
 from commands.api import Enroll
 from commands.api import Session
+from commands.api import Score
 from commands.api import Token
 from commands.api import BehaviouralSubmit
 from commands.videoconv import VideoConv
@@ -64,6 +66,8 @@ def main():
         cmd = Compare(options)
     elif options.get('enroll'):
         cmd = Enroll(options)
+    elif options.get('score'):
+        cmd = Score(options)
     elif options.get('token'):
         cmd = Token(options)
     elif options.get('session'):

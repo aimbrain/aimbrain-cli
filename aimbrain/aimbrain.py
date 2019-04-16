@@ -5,6 +5,7 @@ Usage:
   aimbrain-cli auth (face|voice) <biometrics> --user-id=<uid> --api-key=<api_key> --secret=<secret> [--token=<token>] [--api-url=<api_url>] [--device=<device>] [--system=<system>]
   aimbrain-cli behavioural-submit <data> --user-id=<uid> --api-key=<api_key> --secret=<secret> [--api-url=<api_url>] [--device=<device>] [--system=<system>] [--session=<session_id>]
   aimbrain-cli compare (face) <biometric1> <biometric2> --user-id=<uid> --api-key=<api_key> --secret=<secret> [--api-url=<api_url>] [--device=<device>] [--system=<system>]
+  aimbrain-cli delete (face|voice) --user-id=<uid> --api-key=<api_key> --secret=<secret> [--api-url=<api_url>] [--device=<device>] [--system=<system>]
   aimbrain-cli enroll (face|voice) <biometrics>... --user-id=<uid> --api-key=<api_key> --secret=<secret> [--api-url=<api_url>] [--device=<device>] [--system=<system>]
   aimbrain-cli score --api-key=<api_key> --user-id=<uid> --secret=<secret> [--api-url=<api_url>] [--device=<device>] [--system=<system>] [--session=<session_id>]
   aimbrain-cli token (face|voice) --user-id=<uid> --api-key=<api_key> --secret=<secret> [--token=<token>] [--api-url=<api_url>] [--device=<device>] [--system=<system>]
@@ -46,6 +47,7 @@ from docopt import docopt
 from . import __version__ as VERSION
 from commands.api import Auth
 from commands.api import Compare
+from commands.api import Delete
 from commands.api import Enroll
 from commands.api import Session
 from commands.api import Score
@@ -64,6 +66,8 @@ def main():
         cmd = Auth(options)
     elif options.get('compare'):
         cmd = Compare(options)
+    elif options.get('delete'):
+        cmd = Delete(options)
     elif options.get('enroll'):
         cmd = Enroll(options)
     elif options.get('score'):

@@ -14,6 +14,9 @@ from aimbrain.commands.base import BaseCommand
 V1_SESSIONS_ENDPOINT = '/v1/sessions'
 V1_SCORE_ENDPOINT = '/v1/score'
 
+V1_DELETE_FACE_ENDPOINT = '/v1/face/delete'
+V1_DELETE_VOICE_ENDPOINT = '/v1/voice/delete'
+
 V1_FACE_AUTH_ENDPOINT = '/v1/face/auth'
 V1_FACE_COMPARE_ENDPOINT = '/v1/face/compare'
 V1_FACE_ENROLL_ENDPOINT = '/v1/face/enroll'
@@ -320,6 +323,32 @@ class Enroll(AbstractRequestGenerator):
         body = {biometric_key: []}
         for biometric in self.biometrics:
             body[biometric_key].append(self.encode_biometric(biometric))
+
+        self.do_request(endpoint, body)
+
+
+class Delete(AbstractRequestGenerator):
+    """
+    Implements delete requests for both face and voice.
+    """
+
+    def __init__(self, options, *args, **kwargs):
+        super(Delete, self).__init__(options, args, kwargs)
+
+    def run(self):
+        endpoint = ''
+
+        if self.auth_method == 'face':
+            endpoint = V1_DELETE_FACE_ENDPOINT
+
+        elif self.auth_method == 'voice':
+            endpoint = V1_DELETE_VOICE_ENDPOINT
+
+        else:
+            # We should never get here...
+            raise SystemExit('Unknown auth method "%s"' % self.auth_method)
+
+        body = {'userId': self.user_id}
 
         self.do_request(endpoint, body)
 

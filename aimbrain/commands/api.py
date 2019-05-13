@@ -12,6 +12,7 @@ import requests
 from aimbrain.commands.base import BaseCommand
 
 V1_SESSIONS_ENDPOINT = '/v1/sessions'
+V1_SCORE_ENDPOINT = '/v1/score'
 
 V1_FACE_AUTH_ENDPOINT = '/v1/face/auth'
 V1_FACE_COMPARE_ENDPOINT = '/v1/face/compare'
@@ -219,7 +220,7 @@ class AbstractRequestGenerator(BaseCommand):
         body <dict> -- Body of request
         """
 
-        if require_session:
+        if require_session and 'session' not in body:
             body['session'] = self.get_session()
 
         self.get_response_payload(endpoint, json.dumps(body))
@@ -320,6 +321,24 @@ class Enroll(AbstractRequestGenerator):
         for biometric in self.biometrics:
             body[biometric_key].append(self.encode_biometric(biometric))
 
+        self.do_request(endpoint, body)
+
+
+class Score(AbstractRequestGenerator):
+    """
+    Get classification score
+    """
+
+    def __init__(self, options, *args, **kwargs):
+        super(Score, self).__init__(options, args, kwargs)
+        self.session_id = options.get('--session')
+
+    def run(self):
+        endpoint = V1_SCORE_ENDPOINT
+
+        body = {}
+        if self.session_id:
+            body['session'] = self.session_id
         self.do_request(endpoint, body)
 
 

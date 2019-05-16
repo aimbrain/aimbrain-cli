@@ -3,7 +3,7 @@ aimbrain-cli
 
 Usage:
   aimbrain-cli auth (face|voice) <biometrics> --user-id=<uid> --api-key=<api_key> --secret=<secret> [--token=<token>] [--api-url=<api_url>] [--device=<device>] [--system=<system>]
-  aimbrain-cli behavioural-submit <data> --user-id=<uid> --api-key=<api_key> --secret=<secret> [--api-url=<api_url>] [--device=<device>] [--system=<system>]
+  aimbrain-cli behavioural-submit <data> --user-id=<uid> --api-key=<api_key> --secret=<secret> --session=<session_id> [--api-url=<api_url>] [--device=<device>] [--system=<system>]
   aimbrain-cli compare (face) <biometric1> <biometric2> --user-id=<uid> --api-key=<api_key> --secret=<secret> [--api-url=<api_url>] [--device=<device>] [--system=<system>]
   aimbrain-cli enroll (face|voice) <biometrics>... --user-id=<uid> --api-key=<api_key> --secret=<secret> [--api-url=<api_url>] [--device=<device>] [--system=<system>]
   aimbrain-cli score --api-key=<api_key> --secret=<secret> --session=<session_id> [--api-url=<api_url>] [--device=<device>] [--system=<system>]

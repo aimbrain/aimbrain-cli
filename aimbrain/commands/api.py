@@ -337,8 +337,7 @@ class Score(AbstractRequestGenerator):
         endpoint = V1_SCORE_ENDPOINT
 
         body = {}
-        if self.session_id:
-            body['session'] = self.session_id
+        body['session'] = self.session_id
         self.do_request(endpoint, body)
 
 
@@ -351,6 +350,7 @@ class BehaviouralSubmit(AbstractRequestGenerator):
         super(BehaviouralSubmit, self).__init__(options, args, kwargs)
 
         self.data = options.get('<data>')
+        self.session_id = options.get('--session')
 
     def run(self):
         endpoint = V1_BEHAVIOURAL_SUBMIT
@@ -358,6 +358,7 @@ class BehaviouralSubmit(AbstractRequestGenerator):
             raise SystemExit('Data file does not exist - "%s"' % self.data)
         with open(self.data, 'r') as f:
             data = json.load(f)
+            data['session'] = self.session_id
             self.do_request(endpoint, data)
 
 
